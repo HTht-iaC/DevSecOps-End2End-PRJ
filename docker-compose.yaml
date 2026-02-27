@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  db:
+    image: mongo:latest
+    container_name: mongodb1
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=htht
+      - MONGO_INITDB_ROOT_PASSWORD=htht1
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  backend:
+    build: ./backend
+    container_name: backendcont
+    ports:
+      - "3500:3500"
+    environment:
+      - MONGO_CONN_STR=mongodb://htht:htht1@db:27017/ZZZZ?authSource=admin
+      - MONGO_USERNAME=htht
+      - MONGO_PASSWORD=htht1
+      - USE_DB_AUTH=true  
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+    container_name: react_frontend
+    ports:
+      - "8099:80"
+    environment:
+      - REACT_APP_BACKEND_URL=http://localhost:3500/api/tasks
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:
