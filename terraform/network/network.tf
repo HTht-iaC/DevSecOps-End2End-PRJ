@@ -67,7 +67,7 @@ resource "aws_route_table" "priv_rt" {
 
   route {
     cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.nat_gw[var.public_subnet_cidrs[index(var.private_subnet_cidrs, each.value)]].id
+    nat_gateway_id = values(aws_nat_gateway.nat_gw)[0].id
   }
 
   tags = {

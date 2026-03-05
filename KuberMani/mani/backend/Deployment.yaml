@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "app-role"
+        vault.hashicorp.com/address: "http://10.0.1.14:8200"
+        vault.hashicorp.com/tls-skip-verify: "true"
+        vault.hashicorp.com/agent-inject-secret-db: "secret/data/db"
+        vault.hashicorp.com/agent-inject-template-db: |
+          {{- with secret "secret/data/db" -}}
+          MONGO_CONN_STR="{{ .Data.data.mongo-conn-str }}"
+          MONGO_USERNAME="{{ .Data.data.username }}"
+          MONGO_PASSWORD="{{ .Data.data.password }}"
+          {{- end }}
+    spec:
+      serviceAccountName: vault-sa
+      containers:
+      - name: backend
+        image: 141005622229.dkr.ecr.us-east-1.amazonaws.com/prj-back-image:latest
+        ports:
+        - containerPort: 3500
+        env:
+        - name: USE_DB_AUTH
+          value: "true"
