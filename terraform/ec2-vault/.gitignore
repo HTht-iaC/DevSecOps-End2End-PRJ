@@ -4,3 +4,4 @@ terraform.tfstate.backup
 .terraform.lock.hcl
 *.tfvars
 vault_key
+ca.crt
