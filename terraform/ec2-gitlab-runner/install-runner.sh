@@ -14,3 +14,4 @@ systemctl start gitlab-runner
 yum install -y yum-utils
 yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
 yum install -y terraform vault
+yum install -y jq
