@@ -1,10 +1,3 @@
-workflow:
-  rules:
-    - changes:
-        - terraform/eks-cluster/**/*
-      when: always
-    - when: never
-
 variables:
   ENV: secret
   TERRAFORM_ACTION: apply
@@ -32,6 +25,11 @@ Config files Validation_for_eks:
   stage: validation
   tags:
     - terraform
+  rules:
+    - changes:
+        - terraform/eks/**/*
+      when: always
+    - when: never
   script:
     - terraform validate
 
@@ -40,15 +38,27 @@ planning_for_eks:
   stage: planning
   tags:
    - terraform
+  rules:
+    - changes:
+        - terraform/eks/**/*
+      when: always
+    - when: never
+
   script:
-   - vault kv get -format=json secret/terraform/eks | \
-     jq -r '.data.data | to_entries[] | "\(.key)=\"\(.value)\""' > $ENV.tfvars
-   - terraform plan -var-file="$ENV.tfvars"
+    - vault kv get -format=json secret/terraform/eks | \
+      jq -r '.data.data | to_entries[] | "\(.key)=\"\(.value)\""' > $ENV.tfvars
+    - terraform plan -var-file="$ENV.tfvars"
 
 apply_job_for_eks:
   stage: action
   tags:
     - terraform
+  rules:
+    - changes:
+        - terraform/eks/**/*
+      when: always
+    - when: never
+
   script:
 
     - if [[ "$TERRAFORM_ACTION" == "apply" ]]; then
@@ -67,6 +77,12 @@ destroy_job_for_eks:
   stage: action
   tags:
    - terraform
+  rules:
+    - changes:
+        - terraform/eks/**/*
+      when: always
+    - when: never
+
   script:
    - if [[ "$TERRAFORM_ACTION" == "destroy" ]]; then
 

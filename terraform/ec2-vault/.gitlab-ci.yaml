@@ -1,11 +1,3 @@
-workflow:
-  rules:
-    - changes:
-        - terraform/ec2-vault/**/*
-      when: always
-    - when: never
-
-
 variables:
   TERRAFORM_ACTION: apply
   TF_IN_AUTOMATION: "true"
@@ -23,6 +15,11 @@ Config files Validation_for_vault:
   stage: validation
   tags:
     - terraform
+  rules:
+    - changes:
+        - terraform/ec2-vault/**/*
+      when: always
+    - when: never
   script:
     - terraform validate
 
@@ -30,6 +27,11 @@ planning_for_vault:
   stage: planning
   tags:
     - terraform
+  rules:
+    - changes:
+        - terraform/ec2-vault/**/*
+      when: always
+    - when: never
   script:
     - terraform plan
 
@@ -37,6 +39,11 @@ apply_job_for_vault:
   stage: action
   tags:
     - terraform
+  rules:
+    - changes:
+        - terraform/ec2-vault/**/*
+      when: always
+    - when: never
   script:
     - if [[ "$TERRAFORM_ACTION" == "apply" ]]; then
         terraform apply -auto-approve
@@ -50,6 +57,11 @@ destroy_job_for_vault:
   stage: action
   tags:
     - terraform
+  rules:
+    - changes:
+        - terraform/ec2-vault/**/*
+      when: always
+    - when: never
   script:
     - if [[ "$TERRAFORM_ACTION" == "destroy" ]]; then
         terraform destroy -auto-approve
