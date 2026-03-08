@@ -7,7 +7,7 @@ before_script:
   - cd $TF_ROOT
   - terraform --version
   - export VAULT_SKIP_VERIFY=true
-  - export VAULT_ADDR=$VAULT_ADDR
+  - export VAULT_ADDR="https://10.0.0.11:8200"
   - |
     VAULT_TOKEN=$(vault write -field=token \
       auth/approle/login \
