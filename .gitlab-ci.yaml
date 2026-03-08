@@ -4,5 +4,3 @@ include:
   - local: terraform/ec2-vault/.gitlab-ci.yaml
   - local: terraform/ec2-gitlab-runner/.gitlab-ci.yaml
   - local: terraform/ecr-htht/.gitlab-ci.yaml
-  - local: backend/.gitlab-ci.yaml
-  - local: frontend/.gitlab-ci.yaml
