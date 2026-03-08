@@ -1,3 +1,10 @@
+workflow:
+  rules:
+    - changes:
+        - terraform/ecr-htht/**/*
+      when: always
+    - when: never
+
 variables:
   TERRAFORM_ACTION: apply
   TF_IN_AUTOMATION: "true"

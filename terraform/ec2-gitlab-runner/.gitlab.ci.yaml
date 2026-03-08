@@ -1,3 +1,13 @@
+workflow:
+  rules:
+    - changes:
+        - terraform/ec2-gitlab-runner/**/*
+      when: always
+    - when: never
+
+
+
+
 variables:
   TERRAFORM_ACTION: apply
   TF_IN_AUTOMATION: "true"

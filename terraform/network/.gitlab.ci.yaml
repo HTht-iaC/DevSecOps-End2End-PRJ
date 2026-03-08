@@ -1,3 +1,10 @@
+workflow:
+  rules:
+    - changes:
+        - terraform/network/**/*
+      when: always
+    - when: never
+
 variables:
   ENV: secret
   TERRAFORM_ACTION: apply 
