@@ -1,0 +1,76 @@
+variables:
+  ENV: variables
+  TERRAFORM_ACTION: apply 
+  TF_IN_AUTOMATION: "true" 
+     
+
+
+before_script: 
+  - terraform --version 
+  - export VAULT_SKIP_VERIFY=true 
+  - |
+    VAULT_TOKEN=$(vault write -field=token \
+      auth/approle/login \
+      role_id=$VAULT_ROLE_ID \
+      secret_id=$VAULT_SECRET_ID)
+    export VAULT_TOKEN
+  - terraform init
+
+stages:
+  - validation
+  - planning 
+  - action 
+
+Config files Validation:
+  stage: validation 
+  tags:
+    - terraform 
+  script:
+    - terraform validate 
+
+
+planning:
+  stage: planning
+  tags:
+   - terraform 
+  script:
+   - vault kv get -format=json secret/terraform/network | \
+     jq -r '.data.data | to_entries[] | "\(.key)=\"\(.value)\""' > secret.tfvars
+   - terraform plan -var-file="secret.tfvars"
+
+apply_job:
+  stage: action 
+  tags:
+    - terraform
+  script:
+    
+    - if [[ "$TERRAFORM_ACTION" == "apply" ]]; then
+
+          vault kv get -format=json secret/terraform/network | \
+          jq -r '.data.data | to_entries[] | "\(.key)=\"\(.value)\""' > secret.tfvars
+          terraform apply -auto-approve -var-file="secret.tfvars"
+      fi 
+  when: manual 
+
+  only: 
+    variables:
+     - $TERRAFORM_ACTION == "apply"
+
+destroy_job:
+  stage: action 
+  tags:
+   - terraform
+  script:
+   - if [[ "$TERRAFORM_ACTION" == "destroy" ]]; then
+
+          vault kv get -format=json secret/terraform/network | \
+          jq -r '.data.data | to_entries[] | "\(.key)=\"\(.value)\""' > secret.tfvars
+          terraform destroy -auto-approve -var-file="secret.tfvars"
+      fi
+  when: manual
+  
+  only:
+    variables:
+     - $TERRAFORM_ACTION == "destroy" 
+ 
+

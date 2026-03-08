@@ -11,3 +11,6 @@ dnf install -y gitlab-runner
 usermod -aG docker gitlab-runner
 systemctl enable gitlab-runner
 systemctl start gitlab-runner
+yum install -y yum-utils
+yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
+yum install -y terraform vault
