@@ -43,8 +43,7 @@ planning_for_network:
       when: always
     - when: never
   script:
-    - vault kv get -format=json secret/terraform/network | \
-      jq -r '.data.data | to_entries[] | "\(.key)=\"\(.value)\""' > $ENV.tfvars
+    - vault kv get -format=json secret/terraform/network | jq -r '.data.data | to_entries[] | "\(.key)=\"\(.value)\""' > $ENV.tfvars
     - terraform plan -var-file="$ENV.tfvars"
 
 apply_job_for_network:
@@ -58,8 +57,7 @@ apply_job_for_network:
       when: manual
     - when: never
   script:
-    - vault kv get -format=json secret/terraform/network | \
-      jq -r '.data.data | to_entries[] | "\(.key)=\"\(.value)\""' > $ENV.tfvars
+    - vault kv get -format=json secret/terraform/network | jq -r '.data.data | to_entries[] | "\(.key)=\"\(.value)\""' > $ENV.tfvars
     - terraform apply -auto-approve -var-file="$ENV.tfvars"
 
 destroy_job_for_network:
@@ -73,6 +71,5 @@ destroy_job_for_network:
       when: manual
     - when: never
   script:
-    - vault kv get -format=json secret/terraform/network | \
-      jq -r '.data.data | to_entries[] | "\(.key)=\"\(.value)\""' > $ENV.tfvars
+    - vault kv get -format=json secret/terraform/network | jq -r '.data.data | to_entries[] | "\(.key)=\"\(.value)\""' > $ENV.tfvars
     - terraform destroy -auto-approve -var-file="$ENV.tfvars"
