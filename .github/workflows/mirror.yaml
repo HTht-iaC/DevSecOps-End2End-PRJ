@@ -1,0 +1,15 @@
+name: Mirror to GitLab
+on: [push]
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Push to GitLab
+        run: |
+          git remote add gitlab https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.com/7T70T-group/EndToEndDevSecOps.git
+          git push gitlab --all --force 
+
+

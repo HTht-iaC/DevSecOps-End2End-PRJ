@@ -1,0 +1,52 @@
+variables:
+  TERRAFORM_ACTION: apply
+  TF_IN_AUTOMATION: "true"
+
+before_script:
+  - terraform --version
+  - terraform init
+
+stages:
+  - validation
+  - planning
+  - action
+
+Config files Validation:
+  stage: validation
+  tags:
+    - terraform
+  script:
+    - terraform validate
+
+planning:
+  stage: planning
+  tags:
+    - terraform
+  script:
+    - terraform plan
+
+apply_job:
+  stage: action
+  tags:
+    - terraform
+  script:
+    - if [[ "$TERRAFORM_ACTION" == "apply" ]]; then
+        terraform apply -auto-approve
+      fi
+  when: manual
+  only:
+    variables:
+      - $TERRAFORM_ACTION == "apply"
+
+destroy_job:
+  stage: action
+  tags:
+    - terraform
+  script:
+    - if [[ "$TERRAFORM_ACTION" == "destroy" ]]; then
+        terraform destroy -auto-approve
+      fi
+  when: manual
+  only:
+    variables:
+      - $TERRAFORM_ACTION == "destroy"
