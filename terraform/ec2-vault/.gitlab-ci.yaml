@@ -1,8 +1,10 @@
 variables:
   TERRAFORM_ACTION: apply
   TF_IN_AUTOMATION: "true"
+  TF_ROOT: terraform/ec2-vault
 
 before_script:
+  - cd $TF_ROOT
   - terraform --version
   - terraform init
 

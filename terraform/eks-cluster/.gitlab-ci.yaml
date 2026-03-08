@@ -1,9 +1,10 @@
 variables:
-  ENV: secret
   TERRAFORM_ACTION: apply
   TF_IN_AUTOMATION: "true"
+  TF_ROOT: terraform/eks-cluster
 
 before_script:
+  - cd $TF_ROOT
   - terraform --version
   - export VAULT_SKIP_VERIFY=true
   - |
