@@ -40,33 +40,23 @@ apply_job_for_ecr:
   tags:
     - terraform
   rules:
-    - changes:
+    - if: '$TERRAFORM_ACTION == "apply"'
+      changes:
         - terraform/ecr-htht/**/*
-      when: always
+      when: manual
     - when: never
   script:
-    - if [[ "$TERRAFORM_ACTION" == "apply" ]]; then
-        terraform apply -auto-approve
-      fi
-  when: manual
-  only:
-    variables:
-      - $TERRAFORM_ACTION == "apply"
+    - terraform apply -auto-approve
 
 destroy_job_for_ecr:
   stage: action
   tags:
     - terraform
   rules:
-    - changes:
+    - if: '$TERRAFORM_ACTION == "destroy"'
+      changes:
         - terraform/ecr-htht/**/*
-      when: always
+      when: manual
     - when: never
   script:
-    - if [[ "$TERRAFORM_ACTION" == "destroy" ]]; then
-        terraform destroy -auto-approve
-      fi
-  when: manual
-  only:
-    variables:
-      - $TERRAFORM_ACTION == "destroy"
+    - terraform destroy -auto-approve

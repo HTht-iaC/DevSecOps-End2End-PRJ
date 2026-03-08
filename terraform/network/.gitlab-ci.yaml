@@ -1,13 +1,11 @@
 variables:
   ENV: secret
-  TERRAFORM_ACTION: apply 
-  TF_IN_AUTOMATION: "true" 
-     
+  TERRAFORM_ACTION: apply
+  TF_IN_AUTOMATION: "true"
 
-
-before_script: 
-  - terraform --version 
-  - export VAULT_SKIP_VERIFY=true 
+before_script:
+  - terraform --version
+  - export VAULT_SKIP_VERIFY=true
   - |
     VAULT_TOKEN=$(vault write -field=token \
       auth/approle/login \
@@ -18,11 +16,11 @@ before_script:
 
 stages:
   - validation
-  - planning 
-  - action 
+  - planning
+  - action
 
 Config files Validation for_network:
-  stage: validation 
+  stage: validation
   tags:
     - terraform
   rules:
@@ -31,66 +29,48 @@ Config files Validation for_network:
       when: always
     - when: never
   script:
-    - terraform validate 
-
+    - terraform validate
 
 planning_for_network:
   stage: planning
   tags:
-   - terraform 
+    - terraform
   rules:
     - changes:
         - terraform/network/**/*
       when: always
     - when: never
   script:
-   - vault kv get -format=json secret/terraform/network | \
-     jq -r '.data.data | to_entries[] | "\(.key)=\"\(.value)\""' > $ENV.tfvars
-   - terraform plan -var-file="$ENV.tfvars"
+    - vault kv get -format=json secret/terraform/network | \
+      jq -r '.data.data | to_entries[] | "\(.key)=\"\(.value)\""' > $ENV.tfvars
+    - terraform plan -var-file="$ENV.tfvars"
 
 apply_job_for_network:
-  stage: action 
+  stage: action
   tags:
     - terraform
   rules:
-    - changes:
+    - if: '$TERRAFORM_ACTION == "apply"'
+      changes:
         - terraform/network/**/*
-      when: always
-    - when: never    
+      when: manual
+    - when: never
   script:
-    
-    - if [[ "$TERRAFORM_ACTION" == "apply" ]]; then
+    - vault kv get -format=json secret/terraform/network | \
+      jq -r '.data.data | to_entries[] | "\(.key)=\"\(.value)\""' > $ENV.tfvars
+    - terraform apply -auto-approve -var-file="$ENV.tfvars"
 
-          vault kv get -format=json secret/terraform/network | \
-          jq -r '.data.data | to_entries[] | "\(.key)=\"\(.value)\""' > $ENV.tfvars
-          terraform apply -auto-approve -var-file="$ENV.tfvars"
-      fi 
-  when: manual 
-
-  only: 
-    variables:
-     - $TERRAFORM_ACTION == "apply"
-
-destroy_job_fornetwork:
-  stage: action 
+destroy_job_for_network:
+  stage: action
   tags:
-   - terraform
+    - terraform
   rules:
-    - changes:
+    - if: '$TERRAFORM_ACTION == "destroy"'
+      changes:
         - terraform/network/**/*
-      when: always
-    - when: never   
+      when: manual
+    - when: never
   script:
-   - if [[ "$TERRAFORM_ACTION" == "destroy" ]]; then
-
-          vault kv get -format=json secret/terraform/network | \
-          jq -r '.data.data | to_entries[] | "\(.key)=\"\(.value)\""' > $ENV.tfvars
-          terraform destroy -auto-approve -var-file="$ENV.tfvars"
-      fi
-  when: manual
-  
-  only:
-    variables:
-     - $TERRAFORM_ACTION == "destroy" 
- 
-
+    - vault kv get -format=json secret/terraform/network | \
+      jq -r '.data.data | to_entries[] | "\(.key)=\"\(.value)\""' > $ENV.tfvars
+    - terraform destroy -auto-approve -var-file="$ENV.tfvars"

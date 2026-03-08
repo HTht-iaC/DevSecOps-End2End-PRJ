@@ -3,8 +3,6 @@ variables:
   TERRAFORM_ACTION: apply
   TF_IN_AUTOMATION: "true"
 
-
-
 before_script:
   - terraform --version
   - export VAULT_SKIP_VERIFY=true
@@ -27,23 +25,21 @@ Config files Validation_for_eks:
     - terraform
   rules:
     - changes:
-        - terraform/eks/**/*
+        - terraform/eks-cluster/**/*
       when: always
     - when: never
   script:
     - terraform validate
 
-
 planning_for_eks:
   stage: planning
   tags:
-   - terraform
+    - terraform
   rules:
     - changes:
-        - terraform/eks/**/*
+        - terraform/eks-cluster/**/*
       when: always
     - when: never
-
   script:
     - vault kv get -format=json secret/terraform/eks | \
       jq -r '.data.data | to_entries[] | "\(.key)=\"\(.value)\""' > $ENV.tfvars
@@ -54,45 +50,27 @@ apply_job_for_eks:
   tags:
     - terraform
   rules:
-    - changes:
-        - terraform/eks/**/*
-      when: always
+    - if: '$TERRAFORM_ACTION == "apply"'
+      changes:
+        - terraform/eks-cluster/**/*
+      when: manual
     - when: never
-
   script:
-
-    - if [[ "$TERRAFORM_ACTION" == "apply" ]]; then
-
-          vault kv get -format=json secret/terraform/eks | \
-          jq -r '.data.data | to_entries[] | "\(.key)=\"\(.value)\""' > $ENV.tfvars
-          terraform apply -auto-approve -var-file="$ENV.tfvars"
-      fi
-  when: manual
-
-  only:
-    variables:
-     - $TERRAFORM_ACTION == "apply"
+    - vault kv get -format=json secret/terraform/eks | \
+      jq -r '.data.data | to_entries[] | "\(.key)=\"\(.value)\""' > $ENV.tfvars
+    - terraform apply -auto-approve -var-file="$ENV.tfvars"
 
 destroy_job_for_eks:
   stage: action
   tags:
-   - terraform
+    - terraform
   rules:
-    - changes:
-        - terraform/eks/**/*
-      when: always
+    - if: '$TERRAFORM_ACTION == "destroy"'
+      changes:
+        - terraform/eks-cluster/**/*
+      when: manual
     - when: never
-
   script:
-   - if [[ "$TERRAFORM_ACTION" == "destroy" ]]; then
-
-          vault kv get -format=json secret/terraform/eks | \
-          jq -r '.data.data | to_entries[] | "\(.key)=\"\(.value)\""' > $ENV.tfvars
-          terraform destroy -auto-approve -var-file="$ENV.tfvars"
-      fi
-  when: manual
-
-  only:
-    variables:
-     - $TERRAFORM_ACTION == "destroy"
-
+    - vault kv get -format=json secret/terraform/eks | \
+      jq -r '.data.data | to_entries[] | "\(.key)=\"\(.value)\""' > $ENV.tfvars
+    - terraform destroy -auto-approve -var-file="$ENV.tfvars"
