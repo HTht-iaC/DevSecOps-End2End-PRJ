@@ -19,21 +19,21 @@ stages:
   - planning
   - action
 
-Config files Validation:
+Config files Validation_for_vault:
   stage: validation
   tags:
     - terraform
   script:
     - terraform validate
 
-planning:
+planning_for_vault:
   stage: planning
   tags:
     - terraform
   script:
     - terraform plan
 
-apply_job:
+apply_job_for_vault:
   stage: action
   tags:
     - terraform
@@ -46,7 +46,7 @@ apply_job:
     variables:
       - $TERRAFORM_ACTION == "apply"
 
-destroy_job:
+destroy_job_for_vault:
   stage: action
   tags:
     - terraform

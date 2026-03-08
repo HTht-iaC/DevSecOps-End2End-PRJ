@@ -28,7 +28,7 @@ stages:
   - planning
   - action
 
-Config files Validation:
+Config files Validation_for_eks:
   stage: validation
   tags:
     - terraform
@@ -36,7 +36,7 @@ Config files Validation:
     - terraform validate
 
 
-planning:
+planning_for_eks:
   stage: planning
   tags:
    - terraform
@@ -45,7 +45,7 @@ planning:
      jq -r '.data.data | to_entries[] | "\(.key)=\"\(.value)\""' > $ENV.tfvars
    - terraform plan -var-file="$ENV.tfvars"
 
-apply_job:
+apply_job_for_eks:
   stage: action
   tags:
     - terraform
@@ -63,7 +63,7 @@ apply_job:
     variables:
      - $TERRAFORM_ACTION == "apply"
 
-destroy_job:
+destroy_job_for_eks:
   stage: action
   tags:
    - terraform
