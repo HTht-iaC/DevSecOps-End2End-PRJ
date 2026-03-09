@@ -41,7 +41,7 @@ planning_for_network:
     - terraform init
   script:
     - vault kv get -format=json secret/terraform/network | jq -r '.data.data' > $ENV.tfvars.json
-    - terraform plan -var-file="secret.tfvars"
+    - terraform plan -var-file="$ENV.tfvars.json"
 
 apply_job_for_network:
   stage: action
@@ -61,7 +61,7 @@ apply_job_for_network:
     - terraform init
   script:
     - vault kv get -format=json secret/terraform/network | jq -r '.data.data' > $ENV.tfvars.json
-    - terraform apply -auto-approve -var-file="$ENV.tfvars"
+    - terraform apply -auto-approve -var-file="$ENV.tfvars.json"
 
 destroy_job_for_network:
   stage: action
@@ -81,4 +81,4 @@ destroy_job_for_network:
     - terraform init
   script:
     - vault kv get -format=json secret/terraform/network | jq -r '.data.data' > $ENV.tfvars.json
-    - terraform destroy -auto-approve -var-file="$ENV.tfvars"
+    - terraform destroy -auto-approve -var-file="$ENV.tfvars.json"
