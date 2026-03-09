@@ -1,12 +1,6 @@
 variables:
   TERRAFORM_ACTION: apply
   TF_IN_AUTOMATION: "true"
-  TF_ROOT: terraform/ecr-htht
-
-before_script:
-  - cd $TF_ROOT
-  - terraform --version
-  - terraform init
 
 stages:
   - validation
@@ -22,6 +16,10 @@ Config files Validation_for_ecr:
         - terraform/ecr-htht/**/*
       when: always
     - when: never
+  before_script:
+    - cd terraform/ecr-htht
+    - terraform --version
+    - terraform init
   script:
     - terraform validate
 
@@ -34,6 +32,10 @@ planning_for_ecr:
         - terraform/ecr-htht/**/*
       when: always
     - when: never
+  before_script:
+    - cd terraform/ecr-htht
+    - terraform --version
+    - terraform init
   script:
     - terraform plan
 
@@ -47,6 +49,10 @@ apply_job_for_ecr:
         - terraform/ecr-htht/**/*
       when: manual
     - when: never
+  before_script:
+    - cd terraform/ecr-htht
+    - terraform --version
+    - terraform init
   script:
     - terraform apply -auto-approve
 
@@ -60,5 +66,9 @@ destroy_job_for_ecr:
         - terraform/ecr-htht/**/*
       when: manual
     - when: never
+  before_script:
+    - cd terraform/ecr-htht
+    - terraform --version
+    - terraform init
   script:
     - terraform destroy -auto-approve

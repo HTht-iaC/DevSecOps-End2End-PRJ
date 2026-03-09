@@ -1,20 +1,7 @@
 variables:
   TERRAFORM_ACTION: apply
   TF_IN_AUTOMATION: "true"
-  TF_ROOT: terraform/network
-
-before_script:
-  - cd $TF_ROOT
-  - terraform --version
-  - export VAULT_SKIP_VERIFY=true
-  - export VAULT_ADDR="https://10.0.0.11:8200"
-  - |
-    VAULT_TOKEN=$(vault write -field=token \
-      auth/approle/login \
-      role_id=$VAULT_ROLE_ID \
-      secret_id=$VAULT_SECRET_ID)
-    export VAULT_TOKEN
-  - terraform init
+  VAULT_ADDR: "https://10.0.0.11:8200"
 
 stages:
   - validation
@@ -30,6 +17,10 @@ Config files Validation for_network:
         - terraform/network/**/*
       when: always
     - when: never
+  before_script:
+    - cd terraform/network
+    - terraform --version
+    - terraform init
   script:
     - terraform validate
 
@@ -42,9 +33,15 @@ planning_for_network:
         - terraform/network/**/*
       when: always
     - when: never
+  before_script:
+    - cd terraform/network
+    - terraform --version
+    - VAULT_TOKEN=$(vault write -field=token auth/approle/login role_id=$VAULT_ROLE_ID secret_id=$VAULT_SECRET_ID)
+    - export VAULT_TOKEN
+    - terraform init
   script:
     - vault kv get -format=json secret/terraform/network | jq -r '.data.data | to_entries[] | "\(.key)=\"\(.value)\""' > $ENV.tfvars
-    - terraform plan -var-file="$ENV.tfvars"
+    - terraform plan -var-file="secret.tfvars"
 
 apply_job_for_network:
   stage: action
@@ -56,6 +53,12 @@ apply_job_for_network:
         - terraform/network/**/*
       when: manual
     - when: never
+  before_script:
+    - cd terraform/network
+    - terraform --version
+    - VAULT_TOKEN=$(vault write -field=token auth/approle/login role_id=$VAULT_ROLE_ID secret_id=$VAULT_SECRET_ID)
+    - export VAULT_TOKEN
+    - terraform init
   script:
     - vault kv get -format=json secret/terraform/network | jq -r '.data.data | to_entries[] | "\(.key)=\"\(.value)\""' > $ENV.tfvars
     - terraform apply -auto-approve -var-file="$ENV.tfvars"
@@ -70,6 +73,12 @@ destroy_job_for_network:
         - terraform/network/**/*
       when: manual
     - when: never
+  before_script:
+    - cd terraform/network
+    - terraform --version
+    - VAULT_TOKEN=$(vault write -field=token auth/approle/login role_id=$VAULT_ROLE_ID secret_id=$VAULT_SECRET_ID)
+    - export VAULT_TOKEN
+    - terraform init
   script:
     - vault kv get -format=json secret/terraform/network | jq -r '.data.data | to_entries[] | "\(.key)=\"\(.value)\""' > $ENV.tfvars
     - terraform destroy -auto-approve -var-file="$ENV.tfvars"
