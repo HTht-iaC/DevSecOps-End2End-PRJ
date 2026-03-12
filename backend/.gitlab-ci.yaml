@@ -165,7 +165,7 @@ Updating_Image_tag:
     - when: never
   script:
     - cd KuberMani/mani/backend/
-    - sed -i "s|image:.*|image: $ECR_BACKEND:$CI_PIPELINE_IID|" deployment.yaml
+    - 'sed -i "s|image:.*|image: $ECR_BACKEND:$CI_PIPELINE_IID|" deployment.yaml'
     - git status
     - git add deployment.yaml
     - git status
