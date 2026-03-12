@@ -48,6 +48,9 @@ trivy_file_Scan:
   stage: file-scan
   tags:
     - backend
+  image:
+    name: aquasec/trivy:latest
+    entrypoint: [""]  
   rules:
     - if: '$CI_COMMIT_BRANCH == "master"'
       changes:
@@ -86,6 +89,9 @@ Image Scanning backend:
   stage: image-scan
   tags:
     - backend
+  image:
+    name: aquasec/trivy:latest
+    entrypoint: [""]
   rules:
     - if: '$CI_COMMIT_BRANCH == "master"'
       changes:
