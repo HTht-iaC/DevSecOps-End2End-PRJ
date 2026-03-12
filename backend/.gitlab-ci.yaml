@@ -114,7 +114,7 @@ DP-Check backend:
   script:
     - mkdir -p reports
     - docker run --rm \
-        -v $(pwd)/backend:/src \
+        -v "$(pwd)/backend:/src" \
         owasp/dependency-check \
         --scan /src \
         --out /src/reports
