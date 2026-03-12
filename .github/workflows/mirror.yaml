@@ -10,6 +10,6 @@ jobs:
       - name: Push to GitLab
         run: |
           git remote add gitlab https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.com/7T70T-group/EndToEndDevSecOps.git
-          git push gitlab --all 
+          git push gitlab --all --force
 
 
