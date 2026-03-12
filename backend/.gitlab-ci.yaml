@@ -113,11 +113,7 @@ DP-Check backend:
     - when: never
   script:
     - mkdir -p reports
-    - docker run --rm \
-        -v "$(pwd)/backend:/src" \
-        owasp/dependency-check \
-        --scan /src \
-        --out /src/reports
+    - docker run --rm -v $(pwd)/backend:/src owasp/dependency-check --scan /src --out /src/reports
   artifacts:
     untracked: false
     when: on_success
