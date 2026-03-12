@@ -115,6 +115,7 @@ DP-Check backend:
     - cd backend
     - npm install
     - mkdir -p reports
+    - chmod 777 reports
     - docker run --rm -v $(pwd):/src owasp/dependency-check --scan /src --out /src/reports --nvdApiKey $NVD_API_KEY
   artifacts:
     untracked: false
