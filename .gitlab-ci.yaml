@@ -10,6 +10,14 @@ stages:
   - dp-check
   - image-push
   - updating deployment file
+  - installing-Dep-for-frontend
+  - Checking-Code-for-frontend
+  - file-scan-for-frontend
+  - image-build-for-frontend
+  - image-scan-for-frontend
+  - dp-check-for-frontend
+  - image-push-frontend
+  - updating deployment file for frontend
 
 include:
   - local: terraform/network/.gitlab-ci.yaml
@@ -18,3 +26,4 @@ include:
   - local: terraform/ec2-gitlab-runner/.gitlab-ci.yaml
   - local: terraform/ecr-htht/.gitlab-ci.yaml
   - local: backend/.gitlab-ci.yaml
+  - local: frontend/.gitlab-ci.yaml

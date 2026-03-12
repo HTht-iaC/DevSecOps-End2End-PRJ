@@ -1,0 +1,164 @@
+installing Dependancies-for-frontend:
+  stage: installing-Dep-for-frontend
+  tags:
+    - frontend
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - frontend/**/*
+      when: always
+    - when: never
+  script:
+    - cd frontend
+    - npm install
+
+Checking Code Vulnerabilities-for-frontend:
+  stage: Checking-Code-for-frontend
+  tags:
+    - frontend
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    GIT_DEPTH: "0"
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - frontend/**/*
+      when: always
+    - when: never
+  script:
+    - cd frontend
+    - sonar-scanner
+      -Dsonar.projectKey=$SONAR_PROJECT_KEY_FRONTEND
+      -Dsonar.organization=$SONAR_ORGANIZATION_FRONTEND
+      -Dsonar.host.url=https://sonarcloud.io
+      -Dsonar.login=$SONAR_TOKEN_FRONTEND
+      -Dsonar.sources=.
+
+  allow_failure: true
+
+
+trivy_file_Scan-for-frontend:
+  stage: file-scan-for-frontend
+  tags:
+    - frontend
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - frontend/**/*
+      when: always
+    - when: never
+  before_script:
+    - mkdir -p trivy
+  script:
+    - trivy fs . -o trivy/trivy_file_scann.txt
+  artifacts:
+    untracked: false
+    when: always
+    expire_in: 30 days
+    paths:
+      - trivy/
+
+
+
+Image Building-for-frontend :
+  stage: image-build-for-frontend
+  tags:
+    - frontend
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - frontend/**/*
+      when: always
+    - when: never
+  before_script:
+    - cd frontend
+  script:
+    - docker build -t $ECR_FRONTEND:$CI_PIPELINE_IID .
+
+Image Scanning frontend:
+  stage: image-scan-for-frontend
+  tags:
+    - frontend
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - frontend/**/*
+      when: always
+    - when: never
+  before_script:
+    - mkdir -p trivy-image-scan-frontend
+  script:
+    - trivy image --severity HIGH,CRITICAL $ECR_FRONTEND:$CI_PIPELINE_IID -o trivy-image-scan-frontend/trivy-image-scan-frontend.txt
+  artifacts:
+    untracked: false
+    when: on_success
+    expire_in: 30 days
+    paths:
+      - trivy-image-scan-frontend/
+
+
+DP-Check frontend:
+  stage: dp-check-for-frontend
+  tags:
+    - frontend
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - frontend/**/*
+      when: always
+    - when: never
+  script:
+    - cd frontend
+    - npm install
+    - mkdir -p reports
+    - chmod 777 reports
+    - docker run --rm -v $(pwd):/src owasp/dependency-check --scan /src --out /src/reports --nvdApiKey $NVD_API_KEY
+  artifacts:
+    untracked: false
+    when: on_success
+    expire_in: 30 days
+    paths:
+      - frontend/reports/
+
+
+
+Pushing_image_frontend:
+  stage: image-push-frontend
+  tags:
+    - frontend
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - frontend/**/*
+      when: always
+    - when: never
+  before_script:
+    - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_FRONTEND
+  script:
+    - docker push $ECR_FRONTEND:$CI_PIPELINE_IID
+    - docker rmi -f $ECR_FRONTEND:$CI_PIPELINE_IID
+
+
+Updating_Image_tag_for_frontend:
+  stage: updating deployment file for frontend
+  tags:
+    - frontend
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - frontend/**/*
+      when: always
+    - when: never
+  script:
+    - cd KuberMani/mani/frontend/
+    - 'sed -i "s|image:.*|image: $ECR_FRONTEND:$CI_PIPELINE_IID|" deployment.yaml'
+    - git status
+    - git add deployment.yaml
+    - git status
+    - git commit -m "Update deployment Image to version $CI_PIPELINE_IID"
+    - git push https://$GITHUB_TOKEN@github.com/HTht-iaC/DevSecOps-End2End-PRJ.git HEAD:master
+
