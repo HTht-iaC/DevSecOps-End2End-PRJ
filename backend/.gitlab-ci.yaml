@@ -2,6 +2,7 @@ installing Dependancies:
   stage: installing-Dep 
   tags: 
     - backend 
+  image: node:18-alpine
   rules:
     - if: '$CI_COMMIT_BRANCH == "master"'
       changes:
