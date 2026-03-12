@@ -1,2 +1,169 @@
-variables:
+installing Dependancies:
+  stage: installing-Dep 
+  tags: 
+    - backend 
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - backend/**/*
+      when: always
+    - when: never
+  script:
+    - cd backend
+    - npm install 
+
+Checking Code Vulnerabilities: 
+  stage: Checking-Code 
+  tags:
+    - backend 
+  image: 
+    name: sonarsource/sonar-scanner-cli:latest 
+    entrypoint: [""] 
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    GIT_DEPTH: "0"
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - backend/**/*
+      when: always
+    - when: never
+  script:
+    - cd backend
+    - sonar-scanner
+      -Dsonar.projectKey=$SONAR_PROJECT_KEY
+      -Dsonar.organization=$SONAR_ORGANIZATION
+      -Dsonar.host.url=https://sonarcloud.io
+      -Dsonar.login=$SONAR_TOKEN
+      -Dsonar.sources=. 
+  
+  allow_failure: true
+
+
+trivy_file_Scan:
+  stage: file-scan
+  tags:
+    - backend
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - backend/**/*
+      when: always
+    - when: never
+  before_script:
+    - mkdir -p trivy
+  script:
+    - trivy fs . -o trivy/trivy_file_scan.txt
+  artifacts:
+  untracked: false
+  when: always
+  expire_in: 30 days
+  paths:
+    - trivy/
+
+
+
+Image Building :
+  stage: image-build
+  tags:
+    - backend
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - backend/**/*
+      when: always
+    - when: never
+  before_script:
+    - cd backend
+  script:
+    - docker build -t $ECR_BACKEND:$CI_PIPELINE_IID .
+
+Image Scanning backend:
+  stage: image-scan
+  tags:
+    - backend
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - backend/**/*
+      when: always
+    - when: never
+  before_script:
+    - mkdir -p trivy-image-scan
+  script:
+    - trivy image --severity HIGH,CRITICAL $ECR_BACKEND:$CI_PIPELINE_IID -o trivy-image-scan/trivy-image-scan-backend-txt
+  artifacts:
+    untracked: false
+    when: on_success
+    expire_in: 30 days
+    paths:
+      - trivy-image-scan/
+
+
+DP-Check backend:
+  stage: dp-check
+  tags:
+    - backend
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - backend/**/*
+      when: always
+    - when: never
+  script:
+    - mkdir -p reports
+    - docker run --rm \
+        -v $(pwd)/backend:/src \
+        owasp/dependency-check \
+        --scan /src \
+        --out /src/reports
+  artifacts:
+    untracked: false
+    when: on_success
+    expire_in: 30 days
+    paths:
+      - backend/reports/
+
+
+
+Pushing_image_backend:
+  stage: image-push
+  tags:
+    - backend
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - backend/**/*
+      when: always
+    - when: never
+  before_script:
+    - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_BACKEND
+  script:
+    - docker push $ECR_BACKEND:$CI_PIPELINE_IID
+    - docker rmi -f $ECR_BACKEND:$CI_PIPELINE_IID
+
+
+Updating Image tag:
+  stage: updating deployment file
+  tags:
+    - backend
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - backend/**/*
+      when: always
+    - when: never
+  script:
+    - cd KuberMani/mani/backend/
+    - sed -i "s|image:.*|image: $ECR_BACKEND:$CI_PIPELINE_IID|" deployment.yaml
+    - git status
+    - git add deployment.yaml
+    - git status
+    - git commit -m "Update deployment Image to version $CI_PIPELINE_IID"
+    - git push https://$GITHUB_TOKEN@github.com/HTht-iaC/DevSecOps-End2End-PRJ.git master
+
 

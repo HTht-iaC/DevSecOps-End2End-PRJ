@@ -3,10 +3,7 @@ variables:
   TF_IN_AUTOMATION: "true"
   VAULT_ADDR: "https://10.0.0.11:8200"
 
-stages:
-  - validation
-  - planning
-  - action
+
 
 Config files Validation for_network:
   stage: validation

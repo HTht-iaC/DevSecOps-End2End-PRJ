@@ -1,6 +1,20 @@
+stages:
+  - validation
+  - planning
+  - action
+  - installing Dependancies
+  - Checking Code Vulnerabilities
+  - trivy_file_Scan
+  - Image Building
+  - Image Scanning backend
+  - DP-Check backend
+  - Pushing_image_backend
+  - Updating Image tag
+
 include:
   - local: terraform/network/.gitlab-ci.yaml
   - local: terraform/eks-cluster/.gitlab-ci.yaml
   - local: terraform/ec2-vault/.gitlab-ci.yaml
   - local: terraform/ec2-gitlab-runner/.gitlab-ci.yaml
   - local: terraform/ecr-htht/.gitlab-ci.yaml
+  - local: backend/.gitlab-ci.yaml

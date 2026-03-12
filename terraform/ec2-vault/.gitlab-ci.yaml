@@ -2,10 +2,6 @@ variables:
   TERRAFORM_ACTION: apply
   TF_IN_AUTOMATION: "true"
 
-stages:
-  - validation
-  - planning
-  - action
 
 Config files Validation_for_vault:
   stage: validation
