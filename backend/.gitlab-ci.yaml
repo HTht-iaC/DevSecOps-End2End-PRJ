@@ -153,7 +153,7 @@ Pushing_image_backend:
     - docker rmi -f $ECR_BACKEND:$CI_PIPELINE_IID
 
 
-Updating Image tag:
+Updating_Image_tag:
   stage: updating deployment file
   tags:
     - backend
@@ -169,7 +169,7 @@ Updating Image tag:
     - git status
     - git add deployment.yaml
     - git status
-    - git commit -m "Update deployment Image to version $CI_PIPELINE_IID"
+    - git commit -m 'Update deployment Image to version $CI_PIPELINE_IID'
     - git push https://$GITHUB_TOKEN@github.com/HTht-iaC/DevSecOps-End2End-PRJ.git master
 
 
