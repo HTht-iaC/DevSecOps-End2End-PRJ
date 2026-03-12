@@ -2,14 +2,14 @@ stages:
   - validation
   - planning
   - action
-  - installing Dependancies
-  - Checking Code Vulnerabilities
-  - trivy_file_Scan
-  - Image Building
-  - Image Scanning backend
-  - DP-Check backend
-  - Pushing_image_backend
-  - Updating Image tag
+  - installing-Dep
+  - Checking-Code
+  - file-scan
+  - image-build
+  - image-scan
+  - dp-check
+  - image-push
+  - updating deployment file
 
 include:
   - local: terraform/network/.gitlab-ci.yaml
