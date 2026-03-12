@@ -157,6 +157,6 @@ Updating_Image_tag:
     - git add Deployment.yaml
     - git status
     - git commit -m "Update deployment Image to version $CI_PIPELINE_IID"
-    - git push https://$GITHUB_TOKEN@github.com/HTht-iaC/DevSecOps-End2End-PRJ.git master
+    - git push https://$GITHUB_TOKEN@github.com/HTht-iaC/DevSecOps-End2End-PRJ.git HEAD:master
 
 
