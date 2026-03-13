@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: monitoring-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/HTht-iaC/DevSecOps-End2End-PRJ.git'
+    targetRevision: HEAD
+    path: KuberMani/mani/Monitoring/namespace
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: monitoring
+
+  syncPolicy:
+    syncOptions: []
+
